@@ -41,31 +41,36 @@ public class CustomerServiceImpl implements CustomerService {
 	public TripBooking bookTrip(int customerId, String fromLocation, String toLocation, int distanceInKm) throws Exception{
 		//Book the driver with lowest driverId who is free (cab available variable is Boolean.TRUE). If no driver is available, throw "No cab available!" exception
 		Driver driver = null;
-		TripBooking trip = new TripBooking();
-		List<Driver> list = driverRepository2.findAll();
-		for(Driver driver1 : list){
-			if((driver == null) ||(driver.getDriverId() > driver1.getDriverId())){
-				driver = driver1;
+		TripBooking bookTrip = new TripBooking();
+		List<Driver> driverList = driverRepository2.findAll();
+		for (Driver d : driverList) {
+			if (d.getCab().getAvailable()) {
+				if ((driver == null) || (driver.getDriverId() > d.getDriverId())) {
+					driver = d;
+				}
 			}
 		}
-		if(driver == null) throw new Exception("No cab available!");
-
+		if(driver == null) {
+			throw new Exception("No cab available!");
+		}
 		Customer customer = customerRepository2.findById(customerId).get();
-		List<TripBooking> tripBookingList = customer.getTripBookingList();
 
-		trip.setCustomer(customer);
-		trip.setDriver(driver);
-		trip.setStatus(TripStatus.CONFIRMED);
-		trip.setFromLocation(fromLocation);
-		trip.setToLocation(toLocation);
-		trip.setDistanceInKm(distanceInKm);
-		driver.getCab().setAvailable(false);
-		tripBookingList.add(trip);
+		bookTrip.setCustomer(customer);
+		bookTrip.setDriver(driver);
+		driver.getCab().setAvailable(Boolean.FALSE);
+		bookTrip.setFromLocation(fromLocation);
+		bookTrip.setToLocation(toLocation);
+		bookTrip.setDistanceInKm(distanceInKm);
+		bookTrip.setStatus(TripStatus.CONFIRMED);
 
-		customer.getTripBookingList().add(trip);
-		customerRepository2.save(customer);
+		customer.getTripBookingList().add(bookTrip);
+		customerRepository2.save(customer); //saving the parent.
+
+		driver.getTripBookingList().add(bookTrip);
 		driverRepository2.save(driver);
-		return tripBookingRepository2.save(trip);
+
+		return bookTrip;
+
 	}
 
 	@Override
