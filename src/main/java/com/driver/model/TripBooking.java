@@ -10,7 +10,7 @@ import javax.persistence.*;
 public class TripBooking {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int tripBookingId;
 
     private String fromLocation;
